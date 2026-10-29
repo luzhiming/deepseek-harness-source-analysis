@@ -1,6 +1,8 @@
-# dsh-src-review
+# deepseek-harness-source-analysis
 
 DeepSeek Harness（`dsh`）源码解析笔记。第三方非官方项目。
+
+本仓库：https://github.com/luzhiming/deepseek-harness-source-analysis
 
 ## 上游是什么
 
