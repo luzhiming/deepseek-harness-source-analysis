@@ -18,6 +18,10 @@ DeepSeek 官方的开源 agent harness，TypeScript 写的，架构是「一切�
 
 上游协议：MIT，`Copyright (c) 2026 DeepSeek`。
 
+## 笔记索引
+
+- [01 Fiber 的 epoch、依赖链指纹与 uid](./01-fiber-epoch-and-uid.md) —— Fiber 用 `epoch` 记录「当前依赖由哪些提供者 Fiber（uid）组成」；依赖变了就卸再载，没变就不动。
+
 ## 协议
 
 本仓库 MIT，完整条款见 [LICENSE](./LICENSE)，`Copyright (c) 2026 luzhiming`。
