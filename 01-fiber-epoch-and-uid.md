@@ -235,15 +235,15 @@ Cordis 注释：`inertia` = **The in-flight load/unload transition**（当前正
 ``` _setEpoch 同步（fiber.ts）
 依赖变更 notify → _refresh()
     │
-    │ reflect.ts:326
+    │ reflect.ts
     ▼
 _setEpoch(newEpoch)
     │
-    │ fiber.ts:625  newEpoch === oldEpoch → return（不重复 reload）
+    │ fiber.ts  newEpoch === oldEpoch → return（不重复 reload）
     ▼
 写入 _runner.epoch
     │
-    │ fiber.ts:629  inertia 非空 → return（仅更新指纹，§6.1）
+    │ fiber.ts  inertia 非空 → return（仅更新指纹，§6.1）
     ▼
 判断：new 有效 且 old 为 '__INACTIVE__' ?
     │
@@ -254,11 +254,11 @@ _setEpoch(newEpoch)
 ``` _reload 链（异步）
 this.inertia = _reload()
     │
-    │ fiber.ts:632  state → LOADING
+    │ fiber.ts  state → LOADING
     ▼
 capture oldEpoch
     │
-    │ fiber.ts:648
+    │ fiber.ts
     ▼
 执行前 epoch 仍 === oldEpoch ?
     │
@@ -266,7 +266,7 @@ capture oldEpoch
     ▼
 _resolveConfig + 执行 apply
     │
-    │ fiber.ts:654-656
+    │ fiber.ts
     ▼
 收尾 epoch 仍 === oldEpoch ?
     │
@@ -277,11 +277,11 @@ _resolveConfig + 执行 apply
 ``` _unload 链（异步与收尾）
 this.inertia = _unload()
     │
-    │ fiber.ts:635  state → UNLOADING
+    │ fiber.ts  state → UNLOADING
     ▼
 清理 disposables（effect / provide 等）
     │
-    │ fiber.ts:676-687
+    │ fiber.ts
     ▼
 收尾：当前 epoch 为 '__INACTIVE__' ?
     │

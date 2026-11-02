@@ -64,7 +64,7 @@ async readSurface(sessionId: SessionId): Promise<SessionSurfaceSnapshot> {
 2. **后三个入口共用一次折叠**：`listEvents`（`tracing.eventRecords`）、`readSurface`（`tracing.currentSurfaceEvents`）、`traceEvent` 都走 `analyzeEventLog` → `foldSurface`——**同一份规范折叠**，所以搜索/追踪与模型实际看到的历史一致。
 3. **`readSession` 走的是 `Session.create`**——它构造一个 detached 的 Session 对象只为**回放校验**，不会让会话变成 live。
 
-`live`/`persisted` 是**查询时刻的观测结论**（`src/corpus.ts:62-87`）：`live` = id 在 `ctx.sessions` 里，`persisted` = id 在持久化后端里——**两者独立，可同时为 true**。header 冲突时直接失败（`SESSION_QUERY_SOURCE_CONFLICT`），不合并、不挑一个。
+`live`/`persisted` 是**查询时刻的观测结论**（`src/corpus.ts`）：`live` = id 在 `ctx.sessions` 里，`persisted` = id 在持久化后端里——**两者独立，可同时为 true**。header 冲突时直接失败（`SESSION_QUERY_SOURCE_CONFLICT`），不合并、不挑一个。
 
 > **`listSessions` 是唯一轻量的入口**——`readSession`/`readSurface`/`filterEvents` 都要加载并校验完整逻辑日志（`session-query` README「已知限制」）。大量会话场景下先 `listSessions` 再定点读，比无脑遍历便宜得多。
 
@@ -77,31 +77,31 @@ async readSurface(sessionId: SessionId): Promise<SessionSurfaceSnapshot> {
 **调用链路**：
 
 ```
-ctx.sessionQuery.listSessions()                        ← session-query/src/index.ts:174
-  └─ corpus.listSessions()                              ← session-query/src/corpus.ts:62
+ctx.sessionQuery.listSessions()                        ← session-query/src/index.ts
+  └─ corpus.listSessions()                              ← session-query/src/corpus.ts
        ├─ persistence.list()   → 记为 { live: false, persisted: true }
        └─ ctx.sessions.list()  → 记为 { live: true,  persisted: 是否也落过盘 }
             └─ [...this.store.values()].map(e => e.session)
                  ▼
-SessionStore.store = new Map<SessionId, SessionEntry>()    core/session/src/index.ts:1065
-  └─ SessionEntry { id, session, carrier, emitCtx,          core/session/src/index.ts:421
+SessionStore.store = new Map<SessionId, SessionEntry>()    core/session/src/index.ts
+  └─ SessionEntry { id, session, carrier, emitCtx,          core/session/src/index.ts
                     announced, announcing, appending,
                     detachRequested, detach }
        └─ Session
-            ├─ private log: SessionEvent[] = []             core/session/src/index.ts:526  ★
+            ├─ private log: SessionEvent[] = []             core/session/src/index.ts  ★
             ├─ private readonly surfaceManager: SurfaceManager
             ├─ readonly header: SessionHeader
             ├─ readonly inheritedEventCount: SessionLogOffset
             └─ private eventsSnapshot: readonly SessionEvent[] | undefined
 ```
 
-**核心源码** —— `SessionStore` 的全部状态就是这一个 Map（`core/session/src/index.ts:1065`）：
+**核心源码** —— `SessionStore` 的全部状态就是这一个 Map（`core/session/src/index.ts`）：
 
 ```ts
 private store = new Map<SessionId, SessionEntry>()
 ```
 
-`SessionEntry` 装的不是会话，是**会话 + 生命周期状态**（`index.ts:421`）：
+`SessionEntry` 装的不是会话，是**会话 + 生命周期状态**（`index.ts`）：
 
 ```ts
 interface SessionEntry {
@@ -119,7 +119,7 @@ interface SessionEntry {
 
 四个布尔量管的是**发布时序**——创建事件、append 事件、拆卸三者的先后；`detach` 是拆卸能力。
 
-`Session` 本体（`index.ts:526`）：
+`Session` 本体（`index.ts`）：
 
 ```ts
 export class Session {
@@ -135,14 +135,14 @@ export class Session {
 三点结论：
 
 1. **"会话"在内存里是三层**：`Map<SessionId, SessionEntry>` → `Session` → `SessionEvent[]`。**会话对象里没有任何消息**——只有一条事件数组、一个 header、和一个表层折叠器。
-2. **`live` 的物理来源**：key 在这个 Map 里 = live。`listSessions()` 的 `live` 标志由此而来（`corpus.ts:78`）。
-3. **持久化是另一个来源**：`corpus.ts:67` 先把 `persistence.list()` 的结果记为 `{ live: false, persisted: true }`，再用 `ctx.sessions.list()` 覆盖成 `{ live: true, persisted: durable !== undefined }`。**两者独立，可同时为 true**。
+2. **`live` 的物理来源**：key 在这个 Map 里 = live。`listSessions()` 的 `live` 标志由此而来（`corpus.ts`）。
+3. **持久化是另一个来源**：`corpus.ts` 先把 `persistence.list()` 的结果记为 `{ live: false, persisted: true }`，再用 `ctx.sessions.list()` 覆盖成 `{ live: true, persisted: durable !== undefined }`。**两者独立，可同时为 true**。
 
-> 另有 `attachments = new WeakMap<Session, SessionEntry>()`（`index.ts:433`）做反向索引——从 Session 找回它的 entry。用 WeakMap 是为了不阻止 Session 被回收。
+> 另有 `attachments = new WeakMap<Session, SessionEntry>()`（`index.ts`）做反向索引——从 Session 找回它的 entry。用 WeakMap 是为了不阻止 Session 被回收。
 
 ### 2.2 写入路径:create → prepare → enter
 
-`create()` 是编排（`index.ts:1126`）：
+`create()` 是编排（`index.ts`）：
 
 ```ts
 create(id?, options?): Session {
@@ -161,9 +161,9 @@ create(id?, options?): Session {
 | `enter` | `store.set(id, entry)` + `attachments.set(...)`，返回 detach 能力 |
 | `announce` | 发 `session/created` |
 
-**为什么拆三步**（源码注释 `index.ts:1144`）：让作用域卸载时会话和 agent 按**确定顺序**一起拆。一步做完的话，卸载时两者是竞态的兄弟 effect，拆卸钩子可能先于 agent 收尾事件触发，那些事件就丢了。
+**为什么拆三步**（源码注释 `index.ts`）：让作用域卸载时会话和 agent 按**确定顺序**一起拆。一步做完的话，卸载时两者是竞态的兄弟 effect，拆卸钩子可能先于 agent 收尾事件触发，那些事件就丢了。
 
-**核心源码** —— `prepare` 不入 store（`index.ts:1158`）：
+**核心源码** —— `prepare` 不入 store（`index.ts`）：
 
 ```ts
 prepare(id?: SessionId, options?: PrepareSessionOptions): Session {
@@ -195,7 +195,7 @@ prepare(id?: SessionId, options?: PrepareSessionOptions): Session {
 >
 > 这个差别是可观察的：自动生成到 `session-2` 时，如果 `session-2` 已被显式占用，它会**跳到 `session-3`**；而显式再创建 `session-2` 则直接抛 `session "session-2" already exists`。
 
-`enter` 才真正写入（`index.ts:1231`）：
+`enter` 才真正写入（`index.ts`）：
 
 ```ts
 const entry: SessionEntry = {
@@ -210,7 +210,7 @@ attachments.set(session, entry)
 
 ### 2.3 事件长什么样
 
-**信封**（`types.ts:501`）：
+**信封**（`types.ts`）：
 
 ```ts
 export type SessionEvent<T extends SessionEventType = SessionEventType> = {
@@ -224,7 +224,7 @@ export type SessionEvent<T extends SessionEventType = SessionEventType> = {
 }
 ```
 
-**先看 `type` 字段的取值域。** `SessionEventType` 就是 `SessionEventMap` 的键（`types.ts:438`）：
+**先看 `type` 字段的取值域。** `SessionEventType` 就是 `SessionEventMap` 的键（`types.ts`）：
 
 ```ts
 /** The appendable event-type keys of {@link SessionEventMap}, plugin-merged extensions included. */
@@ -234,7 +234,7 @@ export type SessionEventType = keyof SessionEventMap
 `SessionEventMap` 是**可合并扩展**的接口——`core/session` 声明了 14 个基础成员，插件通过 declaration merging 追加自己的：
 
 ```ts
-// core/session/src/types.ts:287
+// core/session/src/types.ts
 export interface SessionEventMap {
   'turn/start': { turn: number }
   'turn/end': { turn: number; reason: TurnEndReason }
@@ -263,7 +263,7 @@ export interface SessionEventMap {
 | **fork 边界** | 1 | `session/end-seed` |
 | **插件事件** | 49 | `compaction/*`(4) `team/*`(4) `tool-workflow/*`(4) `approval/*`(3) `feedback/*`(3) `subagent/*`(3) `command/*`(2) `hook/*`(2) `image/*`(2) `job/*`(2) `llm/*`(2) `session/*`(2) `tool/*`(2) 以及 `todo/write`、`goal/change`、`plan/mode`、`model/selection`、`permission/*`、`sandbox/mode`、`schedule/change`、`session-log-deepseek/*`、`web/*`、`working-directory/change`、`workspace/changes`、`agent/inbox/spliced`、`agent-preset/selected`、`deliverables/presented` 等 |
 
-其中只有 5 种是 **"表层事件"**（`SurfaceEventType`，`types.ts:447`）——只有它们**能携带 `surfaceOp`**，也就是只有它们能进入模型可见表层：
+其中只有 5 种是 **"表层事件"**（`SurfaceEventType`，`types.ts`）——只有它们**能携带 `surfaceOp`**，也就是只有它们能进入模型可见表层：
 
 ```ts
 export type SurfaceEventType =
@@ -293,7 +293,7 @@ export interface SessionHeader {
 }
 ```
 
-源码注释点明（`index.ts:540`）：
+源码注释点明（`index.ts`）：
 
 > Kept out of the event log — it is a storage concern, not replayable conversation state.
 
@@ -310,7 +310,7 @@ get seq(): SessionLogOffset {
 
 **seq 就是数组下标**，不需要额外计数器维护。
 
-`index.ts:728` 的快照：
+`index.ts` 的快照：
 
 ```ts
 snapshotEvents(fromSeq = 0, toSeqExclusive = this.seq): readonly SessionEvent[] {

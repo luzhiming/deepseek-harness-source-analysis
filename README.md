@@ -31,6 +31,6 @@ DeepSeek 官方的开源 agent harness，TypeScript 写的，架构是「一切�
 
 本仓库 MIT，完整条款见 [LICENSE](./LICENSE)，`Copyright (c) 2026 luzhiming`。
 
-上游 DeepSeek Harness 同样是 MIT（`Copyright (c) 2026 DeepSeek`），第三方依赖见官方 [THIRD_PARTY_NOTICES.md](https://github.com/deepseek-ai/deepseek-harness/blob/master/THIRD_PARTY_NOTICES.md)。本仓库对上游代码只做分析性引用（路径、行号、短片段）。
+上游 DeepSeek Harness 同样是 MIT（`Copyright (c) 2026 DeepSeek`），第三方依赖见官方 [THIRD_PARTY_NOTICES.md](https://github.com/deepseek-ai/deepseek-harness/blob/master/THIRD_PARTY_NOTICES.md)。本仓库对上游代码只做分析性引用（文件路径与短片段，不标注行号——上游随时变动，行号会失效）。
 
 「DeepSeek」「dsh」等商标归 DeepSeek AI 所有。本仓库非官方，与 DeepSeek AI 无隶属或背书关系。
