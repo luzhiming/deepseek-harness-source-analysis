@@ -23,6 +23,10 @@ DeepSeek 官方的开源 agent harness，TypeScript 写的，架构是「一切�
 - [01 Fiber 的 epoch、依赖链指纹与 uid](./01-fiber-epoch-and-uid.md) —— Fiber 用 `epoch` 记录「当前依赖由哪些提供者 Fiber（uid）组成」；依赖变了就卸再载，没变就不动。
 - [02 服务的注册与使用](./02-服务的注册与使用.md) —— 服务的**注册**（`ctx.provide` / `Service` 构造）与**使用**（`inject` 声明）两侧机制：隔离键如何分配、`notify` 如何把两侧接上、依赖指纹如何决定「起」还是「停」。
 
+### 专题
+
+- [10 会话专题](./10、会话专题/00-Session 的秘密.md) —— DSH 的会话没有「消息列表」，只有一条只追加的事件日志，和从这条日志现场折叠出来的模型可见表层。
+
 ## 协议
 
 本仓库 MIT，完整条款见 [LICENSE](./LICENSE)，`Copyright (c) 2026 luzhiming`。
