@@ -326,4 +326,4 @@ snapshotEvents(fromSeq = 0, toSeqExclusive = this.seq): readonly SessionEvent[] 
 
 ---
 
-**相关阅读**：`02-四个读取入口的完整调用链.md`（待补）—— 这四个入口从 API 到内存的完整分支，每个读多少、校验多严。
+**相关阅读**：[01 会话快照：listSessions 与 load](./01-会话快照：listSessions%20与%20load.md) —— 这四个入口从 API 到内存的完整分支，每个读多少、校验多严，以及快照的边界在哪。
